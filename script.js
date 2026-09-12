@@ -77,13 +77,25 @@
       }
     });
 
+    // 전체 상대 시간 단위 = 첫 장소 HOLD + (전환마다 ENTER+HOLD) * (장소 수 - 1)
+    var TOTAL_UNITS = HOLD + (ENTER + HOLD) * (sceneRefs.length - 1);
+    // 장소 하나당 대략 2.2 * 뷰포트 높이 정도의 스크롤 거리를 배정한다 (본문을 읽을 시간 확보).
+    // 트리거(#journey) 자신의 CSS 높이를 스크롤 거리로 겸용하지 않고 end를 직접 계산해서 넘긴다 —
+    // #journey는 100vh로 고정해 두어야 pin-spacer 계산이 항상 예측 가능하다.
+    var SCROLL_PX_PER_SCENE = function () {
+      return window.innerHeight * 2.2;
+    };
+
     var tl = gsap.timeline({
       scrollTrigger: {
         trigger: journey,
         start: "top top",
-        end: "bottom top",
+        end: function () {
+          return "+=" + sceneRefs.length * SCROLL_PX_PER_SCENE();
+        },
         scrub: 1.2, // 숫자 scrub — 스크롤 입력에 부드럽게 지연 보간되어 따라오게 함 (true 대신 사용)
-        pin: true // 이 프로젝트 전체에서 유일한 pin (FR-009)
+        pin: true, // 이 프로젝트 전체에서 유일한 pin (FR-009)
+        invalidateOnRefresh: true // resize 시 end를 다시 계산하도록 함
       },
       defaults: { ease: "none" } // scrub 구간은 스크롤 위치의 함수이므로 추가 가속/감속을 넣지 않는다
     });
@@ -95,27 +107,31 @@
       var curr = sceneRefs[i];
 
       // Cross-fade + scale: 이전 이미지가 확대되며 흐려지고, 다음 이미지가 축소되며 선명해진다 (20~30% 겹침)
-      tl.to(prev.bg, { scale: 1.1, opacity: 0 }, cursor);
-      tl.to(curr.bg, { scale: 1, opacity: 1 }, cursor);
+      tl.to(prev.bg, { scale: 1.1, opacity: 0, duration: ENTER }, cursor);
+      tl.to(curr.bg, { scale: 1, opacity: 1, duration: ENTER }, cursor);
 
       // 이전 텍스트는 살짝 위로 사라지고, 새 장면의 텍스트는 시차를 두고 등장한다
-      tl.to(prev.text, { opacity: 0, y: -16 }, cursor);
-      tl.to(curr.fg, { y: 0 }, cursor);
-      tl.to(curr.text, { opacity: 1, y: 0, stagger: 0.08 }, cursor + ENTER * 0.35);
+      tl.to(prev.text, { opacity: 0, y: -16, duration: ENTER }, cursor);
+      tl.to(curr.fg, { y: 0, duration: ENTER }, cursor);
+      tl.to(curr.text, { opacity: 1, y: 0, duration: ENTER * 0.6, stagger: 0.08 }, cursor + ENTER * 0.35);
 
       cursor += ENTER;
 
       // Hold 구간: 배경은 아주 느리게 계속 확대되고(깊이감), 전경 패널은 반대 방향으로 살짝 떠올라
       // 배경/전경 사이의 parallax를 만든다. 본문을 읽는 동안 장면은 바뀌지 않는다.
-      tl.to(curr.bg, { scale: 1.04 }, cursor);
-      tl.fromTo(curr.fg, { y: 0 }, { y: -10 }, cursor);
+      tl.to(curr.bg, { scale: 1.04, duration: HOLD }, cursor);
+      tl.fromTo(curr.fg, { y: 0 }, { y: -10, duration: HOLD }, cursor);
 
       cursor += HOLD;
     }
 
     // 첫 장소에도 동일한 hold 중 배경 미세 확대를 적용 (일관된 parallax 리듬)
-    tl.to(sceneRefs[0].bg, { scale: 1.04 }, 0);
-    tl.fromTo(sceneRefs[0].fg, { y: 0 }, { y: -10 }, 0);
+    tl.to(sceneRefs[0].bg, { scale: 1.04, duration: HOLD }, 0);
+    tl.fromTo(sceneRefs[0].fg, { y: 0 }, { y: -10, duration: HOLD }, 0);
+
+    // 마지막 장소가 pin이 풀리는 순간까지 완전히 보인 상태로 유지되도록,
+    // 타임라인 전체 길이를 TOTAL_UNITS에 맞춰 명시적으로 고정한다.
+    tl.duration(TOTAL_UNITS);
 
     // ---------------------------------------------------------------------
     // 이미지/폰트 로딩 완료 후 refresh, 그리고 리사이즈 시 재계산 (T017)
