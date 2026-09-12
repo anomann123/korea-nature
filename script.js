@@ -68,11 +68,13 @@
     sceneRefs.forEach(function (ref, i) {
       if (i === 0) {
         gsap.set(ref.bg, { scale: 1, opacity: 1 });
-        gsap.set(ref.fg, { y: 0 });
+        gsap.set(ref.fg, { y: 0, opacity: 1 });
         gsap.set(ref.text, { opacity: 1, y: 0 });
       } else {
         gsap.set(ref.bg, { scale: 1.05, opacity: 0 });
-        gsap.set(ref.fg, { y: 40 });
+        // fg(.scene__panel)의 opacity도 함께 숨긴다 — 그렇지 않으면 텍스트만 투명해지고
+        // 반투명 패널 배경 상자는 그대로 남아 화면에 빈 사각형처럼 보이게 된다.
+        gsap.set(ref.fg, { y: 40, opacity: 0 });
         gsap.set(ref.text, { opacity: 0, y: 24 });
       }
     });
@@ -110,9 +112,10 @@
       tl.to(prev.bg, { scale: 1.1, opacity: 0, duration: ENTER }, cursor);
       tl.to(curr.bg, { scale: 1, opacity: 1, duration: ENTER }, cursor);
 
-      // 이전 텍스트는 살짝 위로 사라지고, 새 장면의 텍스트는 시차를 두고 등장한다
-      tl.to(prev.text, { opacity: 0, y: -16, duration: ENTER }, cursor);
-      tl.to(curr.fg, { y: 0, duration: ENTER }, cursor);
+      // 이전 패널(반투명 배경 상자 포함)은 통째로 사라지고, 새 패널은 함께 나타난다
+      tl.to(prev.fg, { opacity: 0, y: -16, duration: ENTER }, cursor);
+      tl.to(prev.text, { opacity: 0, duration: ENTER }, cursor);
+      tl.to(curr.fg, { y: 0, opacity: 1, duration: ENTER }, cursor);
       tl.to(curr.text, { opacity: 1, y: 0, duration: ENTER * 0.6, stagger: 0.08 }, cursor + ENTER * 0.35);
 
       cursor += ENTER;

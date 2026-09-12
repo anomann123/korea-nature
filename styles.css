@@ -376,21 +376,13 @@ body[data-motion="auto"] #journey [data-scene] {
 /* GSAP/ScrollTrigger는 CDN에서 비동기로 로드되므로, 스크립트가 아직 실행되기 전
    짧은 순간에도(FOUC) 첫 장소만 보이고 나머지는 숨겨져 있어야 한다. script.js의
    gsap.set()이 실행되면 동일한 값을 인라인 스타일로 다시 적용하며 이어받는다.
-   이 규칙이 없으면 DOM 마지막 요소(보성 녹차밭)가 스태킹 순서상 맨 위에 그려져
-   잠깐 노출됐다가 JS 실행 시점에 설악산으로 "점프"하는 것처럼 보인다.
 
-   주의: 여기서 숨겨야 할 대상은 [data-scene](.scene) 컨테이너 자신이 아니라
-   script.js의 gsap.set()이 실제로 초기화하는 배경 이미지/텍스트 요소들이다.
-   컨테이너 자체를 opacity:0으로 두면 GSAP는 그 컨테이너를 절대 다시 건드리지
-   않으므로(배경/텍스트만 애니메이션함) 해당 장면이 영원히 보이지 않게 된다. */
-body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) [data-parallax="background"] {
-  opacity: 0;
-}
-
-body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) .scene__eyebrow,
-body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) .scene__tagline,
-body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) .scene__paragraph,
-body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) .scene__keywords {
+   주의: 숨겨야 할 대상은 [data-scene](.scene) 컨테이너가 아니라 실제로 화면에
+   그려지는 두 레이어, 즉 [data-parallax="background"](사진)와
+   [data-parallax="foreground"](.scene__panel, 반투명 패널 배경 포함)다.
+   script.js도 이 두 요소의 opacity를 함께 관리하도록 맞춰뒀다 — 패널 컨테이너
+   자체를 숨기지 않으면 텍스트만 투명해진 반투명 사각형이 남아 있게 된다. */
+body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) [data-parallax] {
   opacity: 0;
 }
 
