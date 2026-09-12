@@ -373,6 +373,15 @@ body[data-motion="auto"] #journey [data-scene] {
   border-top: none;
 }
 
+/* GSAP/ScrollTrigger는 CDN에서 비동기로 로드되므로, 스크립트가 아직 실행되기 전
+   짧은 순간에도(FOUC) 첫 장소만 보이고 나머지는 숨겨져 있어야 한다. script.js의
+   gsap.set()이 실행되면 동일한 값을 인라인 스타일로 다시 적용하며 이어받는다.
+   이 규칙이 없으면 DOM 마지막 요소(보성 녹차밭)가 스태킹 순서상 맨 위에 그려져
+   잠깐 노출됐다가 JS 실행 시점에 설악산으로 "점프"하는 것처럼 보인다. */
+body[data-motion="auto"] #journey [data-scene]:not(:first-of-type) {
+  opacity: 0;
+}
+
 /* transform/opacity로만 애니메이션되는 레이어에만 제한적으로 will-change를 건다 (T028) */
 body[data-motion="auto"] [data-parallax] {
   will-change: transform, opacity;
