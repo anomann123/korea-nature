@@ -368,7 +368,7 @@ body[data-motion="auto"] #journey [data-scene] {
   top: 0;
   left: 0;
   right: 0;
-  height: 100vh; /* 부모(#journey, 880vh)에 늘어붙지 않도록 inset:0 대신 명시적 100vh를 고정한다 */
+  height: 100vh; /* #journey는 100vh 트리거이지만, inset:0 대신 명시적 100vh를 고정해 둔다 */
   min-height: 0;
   border-top: none;
 }
@@ -383,10 +383,19 @@ body[data-motion="auto"] [data-parallax] {
    T010이 이미 data-motion="auto"로 스코프를 좁혀 두었으므로 아래는 회귀 방지용
    안전장치다: 어떤 이유로든 겹침 스태킹 규칙이 잘못 매칭되더라도 reduced 상태와
    모바일 폭에서는 항상 정상 세로 흐름으로 강제한다.
+
+   주의: [data-scene](.scene) 자신의 position은 여기서 절대 static으로 바꾸면
+   안 된다 — 그 안의 .scene__media(position:absolute; inset:0)가 .scene을
+   containing block으로 삼고 있어서, .scene이 static이 되면 절대위치 기준이
+   문서 최상단(초기 containing block)으로 튀어 이미지가 완전히 엉뚱한 자리에
+   렌더링된다. .scene은 항상 기본 규칙의 position:relative를 유지해야 한다.
 --------------------------------------------------------------------- */
-body[data-motion="reduced"] #journey,
-body[data-motion="reduced"] #journey [data-scene] {
+body[data-motion="reduced"] #journey {
   position: static;
+  height: auto;
+}
+
+body[data-motion="reduced"] #journey [data-scene] {
   height: auto;
   min-height: 100vh;
   transform: none;
@@ -399,9 +408,12 @@ body[data-motion="reduced"] [data-parallax] {
 }
 
 @media (max-width: 768px) {
-  #journey,
-  #journey [data-scene] {
+  #journey {
     position: static;
+    height: auto;
+  }
+
+  #journey [data-scene] {
     height: auto;
     min-height: 100vh;
     transform: none;
