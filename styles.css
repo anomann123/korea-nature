@@ -344,8 +344,11 @@ body[data-motion="auto"] #journey {
 
 body[data-motion="auto"] #journey [data-scene] {
   position: absolute;
-  inset: 0;
-  min-height: 100vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh; /* 부모(#journey, 880vh)에 늘어붙지 않도록 inset:0 대신 명시적 100vh를 고정한다 */
+  min-height: 0;
   border-top: none;
 }
 
