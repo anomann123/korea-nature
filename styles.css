@@ -48,7 +48,10 @@ button {
   --color-ink-muted: #c9c9c9;
   --color-canvas: #0a0a0a;
   --color-panel-bg: rgba(10, 10, 10, 0.55);
-  --color-panel-gradient: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.78) 45%, rgba(10, 10, 10, 0.92) 100%);
+  /* 사진의 밝기와 무관하게 항상 읽히도록, 패널 상단도 완전 투명(0)으로 두지 않고
+     최소한의 어둡기를 유지한 채 아래로 갈수록 더 어두워지게 한다 */
+  --color-panel-gradient: linear-gradient(180deg, rgba(6, 6, 8, 0.42) 0%, rgba(6, 6, 8, 0.7) 40%, rgba(6, 6, 8, 0.9) 100%);
+  --text-shadow-readable: 0 1px 3px rgba(0, 0, 0, 0.65), 0 6px 18px rgba(0, 0, 0, 0.45);
 
   --font-display: "Noto Sans KR", -apple-system, "Segoe UI", sans-serif;
   --font-body: "Noto Sans KR", -apple-system, "Segoe UI", sans-serif;
@@ -72,7 +75,23 @@ body {
 
 /* ---------------------------------------------------------------------
    Typography hierarchy
+
+   사진 위에 얹히는 모든 텍스트는 패널의 국소 gradient만으로는 사진 밝기에 따라
+   대비가 들쭉날쭉해질 수 있어, text-shadow로 배경 밝기와 무관한 최소 대비를
+   항상 보장한다 (검은 안개/윤곽 효과 — 사진 전체를 어둡게 하지 않는다).
 --------------------------------------------------------------------- */
+.hero__eyebrow,
+.hero__title,
+.hero__lead,
+.scene__eyebrow,
+.scene__tagline,
+.scene__paragraph,
+.scene__keywords li,
+.cta__title,
+.cta__body {
+  text-shadow: var(--text-shadow-readable);
+}
+
 .hero__eyebrow,
 .scene__eyebrow {
   font-family: var(--font-display);
